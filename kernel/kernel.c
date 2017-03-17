@@ -2,6 +2,7 @@
 #include "kernel.h"
 #include <stdint.h>
 #include <stdbool.h>
+#include "boot/multiboot.h"
 /* Hardware text mode color constants. */
 enum vga_color {
 	VGA_COLOR_BLACK = 0,
@@ -99,7 +100,8 @@ void terminal_writestring(const char* data) {
 	terminal_write(data, strlen(data));
 }
  
-void kernel_main(void) {
+void kernel_main(multiboot_info_t* info) {
 	terminal_initialize();
 	terminal_writestring("Hello world");
+	
 }

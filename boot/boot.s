@@ -69,6 +69,8 @@ _start:
 
 	# call init_paging
 
+	push %ebx #passing ebx argiment to kernel_start, there is an information about RAM in ebx
+
 	movl $(pt - 0xC0000000 + 0x3), pd - 0xC0000000
 	movl $(pt - 0xC0000000 + 0x3), pd - 0xC0000000 + 768 * 4
 

@@ -3,19 +3,22 @@ cmake_minimum_required(VERSION 2.8)
 project(os)
 
 add_subdirectory(boot)
+add_subdirectory(libc)
 add_subdirectory(kernel)
 
 set (object_files 
 		"${CMAKE_CURRENT_SOURCE_DIR}/boot/boot.o" 
 		"${CMAKE_CURRENT_SOURCE_DIR}/kernel/kernel.o" 
 		"${CMAKE_CURRENT_SOURCE_DIR}/kernel/paging.o"
+		"${CMAKE_CURRENT_SOURCE_DIR}/libc/itoa.o"
+		"${CMAKE_CURRENT_SOURCE_DIR}/libc/reverse.o"
 	)
 
 add_custom_command(
 	OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/myos.bin
 	COMMAND i686-elf-gcc -T ${CMAKE_CURRENT_SOURCE_DIR}/boot/linker.ld -o ${CMAKE_CURRENT_SOURCE_DIR}/myos.bin 
 						-ffreestanding -O2 -nostdlib ${object_files} -lgcc
-	DEPENDS kernel_run boot_run ${object_files}
+	DEPENDS kernel_run boot_run libc_run ${object_files}
 )
 
 #add_custom_target(
