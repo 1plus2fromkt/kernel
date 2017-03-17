@@ -4,13 +4,11 @@
 uint32_t page_num;
 int32_t free_mem[BITSET_SIZE]; // points to the next free page index
 int32_t curr;
-uint32_t early_part; // in bytes, or smth like that
 extern char end_of_kernel;
 
-void init_memory(uint32_t begin, uint32_t size)
+void init_memory(uint32_t size)
 {
-	early_part = begin;
-	page_num = size / PAGE_SIZE;
+	page_num = size * 0x400 / PAGE_SIZE; // size -> bytes -> num_of_pages
 	int phys_kern = (end_of_kernel - KERNEL_START) / PAGE_SIZE;
 	for (uint32_t i = 0; i < BITSET_SIZE; i++)
 		free_mem[i] = -1;
@@ -23,7 +21,7 @@ void* load_phys_page()
 {
 	if (curr == -1) 
 		return (void*)-1; // PANIC HERE
-	uint32_t next = free_mem[curr], ret = PAGE_SIZE * curr + early_part;
+	uint32_t next = free_mem[curr], ret = PAGE_SIZE * curr + LOW_MEMORY;
 	free_mem[curr] = -1;
 	curr = next;
 	return (void*) ret;
@@ -32,7 +30,7 @@ void* load_phys_page()
 void free_phys_page(void* pos)
 {
 	uint32_t t = (int) pos;
-	uint32_t ind = (t - early_part) / PAGE_SIZE;
+	uint32_t ind = (t - LOW_MEMORY) / PAGE_SIZE;
 	if (free_mem[ind] != -1)
 		return; //ALSO PANIC
 	free_mem[ind] = curr;

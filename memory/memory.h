@@ -3,9 +3,11 @@
 
 #include <stdint.h>
 
-#define BITSET_SIZE (1 << 20)
+#define BITSET_SIZE (1 << 19)
+#define LOW_MEMORY 0x1000000
+#define PAGE_SIZE 4096
 
-void init_memory(uint32_t begin, uint32_t size);
+void init_memory(uint32_t size);
 void* load_phys_page();
 void free_phys_page(void* pos);
 

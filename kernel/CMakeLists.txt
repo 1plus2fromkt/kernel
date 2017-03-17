@@ -12,8 +12,9 @@ endfunction(compile_i686)
 
 compile_i686("kernel")
 compile_i686("paging")
+compile_i686("tty")
 
 add_custom_target(
 	kernel_run ALL
-	DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/kernel.o ${CMAKE_CURRENT_SOURCE_DIR}/paging.o
+	DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/kernel.o ${CMAKE_CURRENT_SOURCE_DIR}/paging.o ${CMAKE_CURRENT_SOURCE_DIR}/tty.o
 )

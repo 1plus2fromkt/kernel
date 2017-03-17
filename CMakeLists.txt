@@ -14,6 +14,7 @@ set (object_files
 		"${CMAKE_CURRENT_SOURCE_DIR}/libc/itoa.o"
 		"${CMAKE_CURRENT_SOURCE_DIR}/libc/reverse.o"
 		"${CMAKE_CURRENT_SOURCE_DIR}/memory/memory.o"
+		"${CMAKE_CURRENT_SOURCE_DIR}/kernel/tty.o"
 	)
 
 add_custom_command(
@@ -23,10 +24,6 @@ add_custom_command(
 	DEPENDS memory_run kernel_run boot_run libc_run ${object_files}
 )
 
-#add_custom_target(
-#	create_bin
-#	DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/myos.bin
-#)
 
 add_custom_command(
 	OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/myos.iso
