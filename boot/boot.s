@@ -69,18 +69,24 @@ _start:
 
 	# call init_paging
 
-	movl $(pt - 0xC0000000 + 0x3), pd - 0xC0000000
-	movl $(pt - 0xC0000000 + 0x3), pd - 0xC0000000 + 768 * 4
+	movl $(pt1 - 0xC0000000 + 0x3), pd - 0xC0000000
+	movl $(pt1 - 0xC0000000 + 0x3), pd - 0xC0000000 + 768 * 4
+	movl $(pt2 - 0xC0000000 + 0x3), pd - 0xC0000000 + 4
+	movl $(pt2 - 0xC0000000 + 0x3), pd - 0xC0000000 + 768 * 4 + 4
 
-	movl $(pt - 0xC0000000), %ebp
+	movl $(pt1 - 0xC0000000), %ebp
+	movl $(pt2 - 0xC0000000), %esi
 	movl $0, %ecx
 	movl $0, %edi
 zaloop:
 	movl %edi, %edx
 	orl $0x3, %edx
 	movl %edx, (%ebp)
+	add $0x1000000, %edx
+	movl %edx, (%esi)
 	add $0x1000, %edi
 	add $4, %ebp
+	add $4, %esi
 	add $1, %ecx
 	cmpl $1023, %ecx
 	jne zaloop
