@@ -4,12 +4,18 @@ project(os)
 
 add_subdirectory(boot)
 add_subdirectory(kernel)
-add_subdirectory(paging)
+
+set (object_files 
+		"${CMAKE_CURRENT_SOURCE_DIR}/boot/boot.o" 
+		"${CMAKE_CURRENT_SOURCE_DIR}/kernel/kernel.o" 
+		"${CMAKE_CURRENT_SOURCE_DIR}/kernel/paging.o"
+	)
 
 add_custom_command(
 	OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/myos.bin
-	COMMAND i686-elf-gcc -T ${CMAKE_CURRENT_SOURCE_DIR}/boot/linker.ld -o ${CMAKE_CURRENT_SOURCE_DIR}/myos.bin -ffreestanding -O2 -nostdlib ${CMAKE_CURRENT_SOURCE_DIR}/boot/boot.o ${CMAKE_CURRENT_SOURCE_DIR}/kernel/kernel.o ${CMAKE_CURRENT_SOURCE_DIR}/paging/paging.o -lgcc
-	DEPENDS paging_run kernel_run boot_run
+	COMMAND i686-elf-gcc -T ${CMAKE_CURRENT_SOURCE_DIR}/boot/linker.ld -o ${CMAKE_CURRENT_SOURCE_DIR}/myos.bin 
+						-ffreestanding -O2 -nostdlib ${object_files} -lgcc
+	DEPENDS kernel_run boot_run ${object_files}
 )
 
 #add_custom_target(
