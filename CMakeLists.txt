@@ -9,7 +9,7 @@ add_subdirectory(paging)
 add_custom_command(
 	OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/myos.bin
 	COMMAND i686-elf-gcc -T ${CMAKE_CURRENT_SOURCE_DIR}/boot/linker.ld -o ${CMAKE_CURRENT_SOURCE_DIR}/myos.bin -ffreestanding -O2 -nostdlib ${CMAKE_CURRENT_SOURCE_DIR}/boot/boot.o ${CMAKE_CURRENT_SOURCE_DIR}/kernel/kernel.o ${CMAKE_CURRENT_SOURCE_DIR}/paging/paging.o -lgcc
-	DEPENDS boot kernel paging
+	DEPENDS paging_run kernel_run boot_run
 )
 
 #add_custom_target(
