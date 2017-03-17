@@ -1,5 +1,6 @@
 #include <stddef.h>
 #include "kernel.h"
+#include "libc/itoa.h"
 #include <stdint.h>
 #include <stdbool.h>
 #include "boot/multiboot.h"
@@ -99,9 +100,19 @@ void terminal_write(const char* data, size_t size) {
 void terminal_writestring(const char* data) {
 	terminal_write(data, strlen(data));
 }
+char buff[64];
  
-void kernel_main(multiboot_info_t* info) {
+void kernel_main() {
 	terminal_initialize();
 	terminal_writestring("Hello world");
+	// uint32_t low = info;//, high = info->mem_upper, smth = info->mmap_addr;
+	// terminal_writestring(itoa(low, buff, 16));
+	// terminal_writestring("\n");
+	// terminal_writestring(itoa(magic, buff, 16));
+	// terminal_writestring("\n");
+	// terminal_writestring(itoa(smth, buff, 16));
+	// terminal_writestring("\n");
+	// terminal_writestring(itoa(low, buff, 16));
+	// terminal_writestring("\n");
 	
 }

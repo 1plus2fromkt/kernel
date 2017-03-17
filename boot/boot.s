@@ -69,20 +69,18 @@ _start:
 
 	# call init_paging
 
-	push %ebx #passing ebx argiment to kernel_start, there is an information about RAM in ebx
-
 	movl $(pt - 0xC0000000 + 0x3), pd - 0xC0000000
 	movl $(pt - 0xC0000000 + 0x3), pd - 0xC0000000 + 768 * 4
 
-	movl $(pt - 0xC0000000), %ebx
+	movl $(pt - 0xC0000000), %ebp
 	movl $0, %ecx
-	movl $0, %eax
+	movl $0, %edi
 zaloop:
-	movl %eax, %edx
+	movl %edi, %edx
 	orl $0x3, %edx
-	movl %edx, (%ebx)
-	add $0x1000, %eax
-	add $4, %ebx
+	movl %edx, (%ebp)
+	add $0x1000, %edi
+	add $4, %ebp
 	add $1, %ecx
 	cmpl $1023, %ecx
 	jne zaloop
@@ -103,6 +101,9 @@ zaloop:
  	movl $0, pd + 0
 	movl %cr3, %ecx
 	movl %ecx, %cr3 # invalidate first page directory because it is unused
+
+	pushl %ebx #passing ebx argiment to kernel_start, there is an information about RAM in ebx
+	pushl %eax
 
 	# Enter the high-level kernel. The ABI requires the stack is 16-byte
 	# aligned at the time of the call instruction (which afterwards pushes
