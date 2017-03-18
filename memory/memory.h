@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#define BITSET_SIZE (1 << 19)
+#define BITSET_SIZE (1 << 20)
 #define LOW_MEMORY 0x1000000
 #define PAGE_SIZE 4096
 

@@ -1,4 +1,4 @@
-mkidr build
+mkdir build
 rm -r ./build/*
 cd build
 cmake ../

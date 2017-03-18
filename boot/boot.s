@@ -37,6 +37,7 @@ stack_top:
 # doesn't make sense to return from this function as the bootloader is gone.
 .section .text
 .global pd
+.global pn
 .global init_paging
 .global _start
 .type _start, @function
@@ -69,27 +70,55 @@ _start:
 
 	# call init_paging
 
-	movl $(pt1 - 0xC0000000 + 0x3), pd - 0xC0000000
-	movl $(pt1 - 0xC0000000 + 0x3), pd - 0xC0000000 + 768 * 4
-	movl $(pt2 - 0xC0000000 + 0x3), pd - 0xC0000000 + 4
-	movl $(pt2 - 0xC0000000 + 0x3), pd - 0xC0000000 + 768 * 4 + 4
+	# movl $(pt1 - 0xC0000000 + 0x3), pd - 0xC0000000
+	# movl $(pt1 - 0xC0000000 + 0x3), pd - 0xC0000000 + 768 * 4
+	# movl $(pt2 - 0xC0000000 + 0x3), pd - 0xC0000000 + 4
+	# movl $(pt2 - 0xC0000000 + 0x3), pd - 0xC0000000 + 768 * 4 + 4
 
-	movl $(pt1 - 0xC0000000), %ebp
-	movl $(pt2 - 0xC0000000), %esi
 	movl $0, %ecx
-	movl $0, %edi
+
+loop1:
+	movl %ecx, %edx
+	imul $0x1000, %edx
+	add $(pt), %edx
+	add $0x3, %edx
+	movl %ecx, %edi
+	imul $4, %edi
+	add $(pd), %edi
+	sub $0xC0000000, %edi
+	sub $0xC0000000, %edx
+	movl %edx, (%edi) 
+	add $3072, %edi #3072 = 768 * 4 -- start of kernel
+	movl %edx, (%edi)
+	add $1, %ecx
+	cmpl $10, %ecx # here should be smth like $(pn) but I couldn't make it work
+	jne loop1
+
+
+	movl $0, %esi
 zaloop:
+	movl %esi, %ebp
+	imul $0x1000, %ebp
+	add $(pt), %ebp
+	sub $0xC0000000, %ebp
+
+	movl $0, %ecx
+	movl %esi, %edi
+	imul $0x400000, %edi
+loop:
 	movl %edi, %edx
 	orl $0x3, %edx
 	movl %edx, (%ebp)
-	add $0x1000000, %edx
-	movl %edx, (%esi)
 	add $0x1000, %edi
 	add $4, %ebp
-	add $4, %esi
 	add $1, %ecx
-	cmpl $1023, %ecx
+	cmpl $1024, %ecx
+	jne loop
+
+	add $1, %esi
+	cmpl $10, %esi # yeah, here is the same thing $(pn)
 	jne zaloop
+
 
 	mov $pd, %ecx
 	subl $0xC0000000, %ecx
@@ -104,9 +133,9 @@ zaloop:
 
  1:
 
- 	movl $0, pd + 0
-	movl %cr3, %ecx
-	movl %ecx, %cr3 # invalidate first page directory because it is unused
+ # 	movl $0, pd + 0
+	# movl %cr3, %ecx
+	# movl %ecx, %cr3 # invalidate first page directory because it is unused. Although I should invalidate all of the first pages, I'll just do it in kernel
 
 	pushl %ebx #passing ebx argiment to kernel_start, there is an information about RAM in ebx
 	pushl %eax

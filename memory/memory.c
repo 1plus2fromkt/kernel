@@ -1,17 +1,27 @@
 #include "kernel/kernel.h"
 #include "memory/memory.h"
+#include "libc/itoa.h"
+#include "kernel/tty.h"
 
 uint32_t page_num;
 int32_t free_mem[BITSET_SIZE]; // points to the next free page index
 int32_t curr;
 extern char end_of_kernel;
+char buff[32];
 
 void init_memory(uint32_t size)
 {
 	page_num = size * 0x400 / PAGE_SIZE; // size -> bytes -> num_of_pages
 	int phys_kern = (end_of_kernel - KERNEL_START) / PAGE_SIZE;
-	for (uint32_t i = 0; i < BITSET_SIZE; i++)
+	// terminal_writestring(itoa(free_mem, buff, 16));
+	for (uint32_t i = 0; i < BITSET_SIZE; i++) {
 		free_mem[i] = -1;
+		if (!(i % 100000)) 
+		{
+			terminal_writestring(itoa(i, buff, 10));
+			terminal_writestring("\n");
+		}
+	}
 	for (uint32_t i = phys_kern / PAGE_SIZE + 1; i < page_num; i++)
 		free_mem[i] = i + 1;
 	curr = phys_kern + 1;
