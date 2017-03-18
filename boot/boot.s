@@ -91,12 +91,12 @@ loop1:
 	add $3072, %edi #3072 = 768 * 4 -- start of kernel
 	movl %edx, (%edi)
 	add $1, %ecx
-	cmpl $10, %ecx # here should be smth like $(pn) but I couldn't make it work
+	cmpl (pn - 0xC0000000), %ecx # here should be smth like $(pn) but I couldn't make it work
 	jne loop1
 
 
 	movl $0, %esi
-zaloop:
+loop2:
 	movl %esi, %ebp
 	imul $0x1000, %ebp
 	add $(pt), %ebp
@@ -116,8 +116,8 @@ loop:
 	jne loop
 
 	add $1, %esi
-	cmpl $10, %esi # yeah, here is the same thing $(pn)
-	jne zaloop
+	cmpl (pn - 0xC0000000), %esi # yeah, here is the same thing $(pn)
+	jne loop2
 
 
 	mov $pd, %ecx
