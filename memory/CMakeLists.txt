@@ -11,8 +11,10 @@ function(compile_i686 name)
 endfunction(compile_i686)
 
 compile_i686("memory")
+compile_i686("kmalloc")
+compile_i686("v_allocator")
 
 add_custom_target(
 	memory_run ALL
-	DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/memory.o
+	DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/memory.o ${CMAKE_CURRENT_SOURCE_DIR}/kmalloc.o ${CMAKE_CURRENT_SOURCE_DIR}/v_allocator.o
 )

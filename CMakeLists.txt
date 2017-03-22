@@ -16,6 +16,8 @@ set (object_files
 		"${CMAKE_CURRENT_SOURCE_DIR}/libc/reverse.o"
 		"${CMAKE_CURRENT_SOURCE_DIR}/memory/memory.o"
 		"${CMAKE_CURRENT_SOURCE_DIR}/kernel/tty.o"
+		"${CMAKE_CURRENT_SOURCE_DIR}/memory/kmalloc.o"
+		"${CMAKE_CURRENT_SOURCE_DIR}/memory/v_allocator.o"
 	)
 
 add_custom_command(

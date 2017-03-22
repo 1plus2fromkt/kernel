@@ -79,6 +79,7 @@ _start:
 
 loop1:
 	movl %ecx, %edx
+	addl $768, %edx # writing to pt[768]
 	imul $0x1000, %edx
 	add $(pt), %edx
 	add $0x3, %edx
@@ -98,6 +99,7 @@ loop1:
 	movl $0, %esi
 loop2:
 	movl %esi, %ebp
+	addl $768, %ebp
 	imul $0x1000, %ebp
 	add $(pt), %ebp
 	sub $0xC0000000, %ebp

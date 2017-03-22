@@ -16,11 +16,6 @@ void init_memory(uint32_t size)
 	// terminal_writestring(itoa(free_mem, buff, 16));
 	for (uint32_t i = 0; i < BITSET_SIZE; i++) {
 		free_mem[i] = -1;
-		if (!(i % 100000)) 
-		{
-			terminal_writestring(itoa(i, buff, 10));
-			terminal_writestring("\n");
-		}
 	}
 	for (uint32_t i = phys_kern / PAGE_SIZE + 1; i < page_num; i++)
 		free_mem[i] = i + 1;

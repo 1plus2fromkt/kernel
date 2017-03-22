@@ -5,9 +5,6 @@
 #include "paging.h"
 #include "kernel.h"
 
-extern uint32_t pd[1024] __attribute__((aligned(4096)));
-extern uint32_t pt[PAGE_NUMBER][1024] __attribute__((aligned(4096)));
-
 enum vga_color {
 	VGA_COLOR_BLACK = 0,
 	VGA_COLOR_BLUE = 1,
