@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include "tty.h"
 #include "paging.h"
+#include "libc/itoa.h"
 #include "kernel.h"
 
 enum vga_color {
@@ -99,4 +100,13 @@ void terminal_write(const char* data, size_t size) {
  
 void terminal_writestring(const char* data) {
 	terminal_write(data, strlen(data));
+}
+
+void write_num(uint32_t t, char* str, uint32_t rad)
+{
+	char buff[16];
+	terminal_writestring(str);
+	terminal_writestring(": ");
+	terminal_writestring(uitoa(t, buff, rad));
+	terminal_writestring("\n");
 }

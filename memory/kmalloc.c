@@ -62,19 +62,17 @@ void set_meta_inf(uint32_t* page, uint32_t info) // put the beginning or the end
 
 void* offsets_to_address(uint32_t pd_off, uint32_t pt_off, uint32_t off)
 {
-	return (void*) ((((uint32_t)&pd[pd_off] << 21)) + ((uint32_t)&pt[pt_off] << 11) + off * PAGE_SIZE);
+	return (void*) (((pd_off << PAGE_DIR_OFFSET)) + (pt_off << PAGE_TABLE_OFFSET) + off * PAGE_SIZE);
 }
 
 uint32_t address_to_dir_num(void* ad)
 {
-	uint32_t* a = (uint32_t*) ad;
-	return (((uint32_t)a >> 21) - (uint32_t)pd) / PAGE_SIZE;
+	return (uint32_t)ad >> PAGE_DIR_OFFSET;
 }
 
-uint32_t address_to_tab_num(void* ad, uint32_t pd_off)
+uint32_t address_to_tab_num(void* ad)
 {
-	uint32_t* a = (uint32_t*)((((uint32_t) ad) & (~(1 << 21))) >> 11);
-	return (uint32_t) (a - pt[pd_off]) / PAGE_SIZE;
+	return ((uint32_t)ad >> PAGE_TABLE_OFFSET) & ((1 << PAGE_TABLE_BITS) - 1);
 }
 
 char buff[64];
@@ -83,17 +81,7 @@ void* kmalloc(uint32_t size, struct v_allocator* a)
 {
 	struct mem_entry* entry = get_entry(size, 0, false, a);
 	uint32_t free = entry->free, base = entry->base;
-	uint32_t end_of_free = base + free;
-	if (size < free)
-	{
-		terminal_writestring(uitoa(base, buff, 10));
-		terminal_writestring("\n");
-		terminal_writestring(uitoa(free, buff, 10));
-		terminal_writestring("\n");
-		terminal_writestring(uitoa(size, buff, 10));
-		terminal_writestring("\n");
-		put_entry(base + size, free - size, a);
-	}
+	uint32_t end_of_free = base + free - 1;
 	uint32_t* page;
 	for (uint32_t i = base; i < base + size; i++)
 	{
@@ -101,20 +89,14 @@ void* kmalloc(uint32_t size, struct v_allocator* a)
 		uint32_t phys = (uint32_t)load_phys_page();
 		(*page) = phys | PT_PRESENT | PT_RW;
 	}
-	if (size != end_of_free) 
+	if (size != free) 
 	{
-		page = get_page(size);
+		page = get_page(base + size);
 		set_meta_inf(page, end_of_free);
+		put_entry(base + size, free - size, a);
 	}
 	uint32_t pd_offset = base / PAGE_TABLE_NUMBER;
 	uint32_t pt_offset = base % PAGE_TABLE_NUMBER;
-	terminal_writestring(uitoa(pd_offset, buff, 10));
-	terminal_writestring("\n");
-	terminal_writestring(uitoa(pt_offset, buff, 10));
-	terminal_writestring("\n");
-	terminal_writestring(uitoa((uint32_t)offsets_to_address(pd_offset, pt_offset, 0), buff, 16));
-	terminal_writestring("\n");
-	terminal_writestring("\n");
 	return offsets_to_address(pd_offset, pt_offset, 0);
 }
 
@@ -127,7 +109,7 @@ void concat(uint32_t page_num, uint32_t sz)
 void kfree(void* address, uint32_t size, struct v_allocator* a)
 {
 	uint32_t dir_num = address_to_dir_num(address);
-	uint32_t tab_num = address_to_tab_num(address, dir_num);
+	uint32_t tab_num = address_to_tab_num(address);
 	uint32_t page_num = dir_num * PAGE_TABLE_NUMBER + tab_num;
 	put_entry(page_num, size, a);
 	for (uint32_t i = page_num; i < size + page_num; i++)

@@ -17,9 +17,10 @@ void init_memory(uint32_t size)
 	for (uint32_t i = 0; i < BITSET_SIZE; i++) {
 		free_mem[i] = -1;
 	}
-	for (uint32_t i = phys_kern / PAGE_SIZE + 1; i < page_num; i++)
+	uint32_t start = phys_kern / PAGE_SIZE + 1;
+	for (uint32_t i = start; i < page_num + start; i++)
 		free_mem[i] = i + 1;
-	curr = phys_kern + 1;
+	curr = start;
 }
 
 void* load_phys_page() 
