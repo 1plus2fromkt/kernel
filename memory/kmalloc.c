@@ -4,9 +4,10 @@
 #include <stdbool.h>
 #include "kernel/kernel.h"
 #include "kernel/tty.h"
+#include "libc/itoa.h"
 #include "v_allocator.h"
 
-struct v_allocator user, kernel;
+struct v_allocator user_allocator, kernel_allocator;
 struct node user_nodes[USER_PAGES], kernel_nodes[KERNEL_PAGES], *puser_nodes[USER_PAGES], *pkernel_nodes[KERNEL_PAGES];
 struct mem_entry user_entries[USER_PAGES], kernel_entries[KERNEL_PAGES];
 struct mem_tree user_tree, kernel_tree;
@@ -35,6 +36,8 @@ void init_mem_manager()
 	user_tree.top = 1;
 	kernel_tree.nodes = pkernel_nodes;
 	kernel_tree.top = 1;
+	kernel_allocator.t = &kernel_tree;
+	user_allocator.t = &user_tree;
 }
 
 uint32_t* get_address(uint32_t page)
@@ -74,13 +77,25 @@ uint32_t address_to_tab_num(void* ad, uint32_t pd_off)
 	return (uint32_t) (a - pt[pd_off]) / PAGE_SIZE;
 }
 
+char buff[64];
+
 void* kmalloc(uint32_t size, struct v_allocator* a)
 {
 	struct mem_entry* entry = get_entry(size, 0, false, a);
 	uint32_t free = entry->free, base = entry->base;
 	uint32_t end_of_free = base + free;
+	if (size < free)
+	{
+		terminal_writestring(uitoa(base, buff, 10));
+		terminal_writestring("\n");
+		terminal_writestring(uitoa(free, buff, 10));
+		terminal_writestring("\n");
+		terminal_writestring(uitoa(size, buff, 10));
+		terminal_writestring("\n");
+		put_entry(base + size, free - size, a);
+	}
 	uint32_t* page;
-	for (uint32_t i = base; i < size; i++)
+	for (uint32_t i = base; i < base + size; i++)
 	{
 		page = get_page(i);
 		uint32_t phys = (uint32_t)load_phys_page();
@@ -93,6 +108,13 @@ void* kmalloc(uint32_t size, struct v_allocator* a)
 	}
 	uint32_t pd_offset = base / PAGE_TABLE_NUMBER;
 	uint32_t pt_offset = base % PAGE_TABLE_NUMBER;
+	terminal_writestring(uitoa(pd_offset, buff, 10));
+	terminal_writestring("\n");
+	terminal_writestring(uitoa(pt_offset, buff, 10));
+	terminal_writestring("\n");
+	terminal_writestring(uitoa((uint32_t)offsets_to_address(pd_offset, pt_offset, 0), buff, 16));
+	terminal_writestring("\n");
+	terminal_writestring("\n");
 	return offsets_to_address(pd_offset, pt_offset, 0);
 }
 
