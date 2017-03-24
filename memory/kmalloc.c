@@ -173,7 +173,7 @@ void concat(uint32_t page_num, uint32_t sz, struct v_allocator *a)
 	{
 		end = get_meta_inf(page);
 		write_num(end, "right concatenation", 10);
-		concat_two_pieces(page_num, sz, page_num + sz, end - page_num - 1, a); 
+		concat_two_pieces(page_num, sz, page_num + sz, end - page_num - sz + 1, a); 
 	}
 }
 
