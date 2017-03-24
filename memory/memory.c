@@ -13,7 +13,6 @@ void init_memory(uint32_t size)
 {
 	page_num = size * 0x400 / PAGE_SIZE; // size -> bytes -> num_of_pages
 	int phys_kern = (end_of_kernel - KERNEL_START) / PAGE_SIZE;
-	// terminal_writestring(itoa(free_mem, buff, 16));
 	for (uint32_t i = 0; i < BITSET_SIZE; i++) {
 		free_mem[i] = -1;
 	}

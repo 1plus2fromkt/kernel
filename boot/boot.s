@@ -92,7 +92,7 @@ loop1:
 	add $3072, %edi #3072 = 768 * 4 -- start of kernel
 	movl %edx, (%edi)
 	add $1, %ecx
-	cmpl (pn - 0xC0000000), %ecx # here should be smth like $(pn) but I couldn't make it work
+	cmpl (pn - 0xC0000000), %ecx 
 	jne loop1
 
 
@@ -118,7 +118,7 @@ loop:
 	jne loop
 
 	add $1, %esi
-	cmpl (pn - 0xC0000000), %esi # yeah, here is the same thing $(pn)
+	cmpl (pn - 0xC0000000), %esi 
 	jne loop2
 
 

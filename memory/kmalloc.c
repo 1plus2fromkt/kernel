@@ -14,12 +14,23 @@ struct mem_tree user_tree, kernel_tree;
 
 // maybe user allocator is not needed here. Probably we don't need it
 
+uint32_t* get_page(uint32_t ind);
+
+void free_pages(struct v_allocator* a)
+{
+	uint32_t base = a->t->nodes[0]->val->base, free = a->t->nodes[0]->val->free;
+	for (uint32_t i = base; i < base + free; i++)
+	{
+		*get_page(i) = 0;
+	}
+}
+
 void init_mem_manager()
 {
 	user_entries[0].base = 0;
 	user_entries[0].free = USER_PAGES;
-	kernel_entries[0].base = KERNEL_START_INDEX * PAGE_TABLE_NUMBER;
-	kernel_entries[0].free = KERNEL_PAGES;
+	kernel_entries[0].base = (KERNEL_START_INDEX + PAGE_NUMBER) * (PAGE_TABLE_NUMBER); // see comment in about PAGE_NUMBER paging.h
+	kernel_entries[0].free = KERNEL_PAGES - (PAGE_NUMBER) * PAGE_TABLE_NUMBER;
 	for (int i = 0; i < USER_PAGES; i++)
 	{
 		user_nodes[i].val = &user_entries[i];
@@ -37,7 +48,13 @@ void init_mem_manager()
 	kernel_tree.nodes = pkernel_nodes;
 	kernel_tree.top = 1;
 	kernel_allocator.t = &kernel_tree;
+	kernel_allocator.left_bound = KERNEL_START_INDEX * PAGE_TABLE_NUMBER;
+	kernel_allocator.right_bound = PAGE_DIRECTORY_NUMBER * PAGE_TABLE_NUMBER;
+	user_allocator.left_bound = 0;
+	user_allocator.right_bound = kernel_allocator.left_bound - 1;
 	user_allocator.t = &user_tree;
+	free_pages(&kernel_allocator);
+	// free_pages(&user_allocator); not working, I don't think we need it. Some bugs with USER_PAGE
 }
 
 uint32_t* get_address(uint32_t page)
@@ -57,7 +74,17 @@ uint32_t* get_page(uint32_t ind)
 // Beginning of the free block holds the end meta, and vice versa(hope right spelling). Used for concatenation 
 void set_meta_inf(uint32_t* page, uint32_t info) // put the beginning or the end of the free block to the free page
 {
-	(*page) = (*page & ((1 >> SYSTEM_BYTES) - 1)) | (info << SYSTEM_BYTES);
+	(*page) = (*page & ((1 << META_INF_OFFSET) - 1)) | (info << META_INF_OFFSET);
+}
+
+uint32_t get_meta_inf(uint32_t* page)
+{
+	return (*page) >> META_INF_OFFSET;
+}
+
+bool is_present(uint32_t* page)
+{
+	return (*page) & PT_PRESENT;
 }
 
 void* offsets_to_address(uint32_t pd_off, uint32_t pt_off, uint32_t off)
@@ -75,6 +102,12 @@ uint32_t address_to_tab_num(void* ad)
 	return ((uint32_t)ad >> PAGE_TABLE_OFFSET) & ((1 << PAGE_TABLE_BITS) - 1);
 }
 
+void present_dir(uint32_t ind)
+{
+	uint32_t dir_num = ind / PAGE_TABLE_NUMBER;
+	pd[dir_num] |= PT_PRESENT | PT_RW;
+}
+
 char buff[64];
 
 void* kmalloc(uint32_t size, struct v_allocator* a)
@@ -86,6 +119,7 @@ void* kmalloc(uint32_t size, struct v_allocator* a)
 	for (uint32_t i = base; i < base + size; i++)
 	{
 		page = get_page(i);
+		present_dir(i);
 		uint32_t phys = (uint32_t)load_phys_page();
 		(*page) = phys | PT_PRESENT | PT_RW;
 	}
@@ -100,10 +134,47 @@ void* kmalloc(uint32_t size, struct v_allocator* a)
 	return offsets_to_address(pd_offset, pt_offset, 0);
 }
 
-void concat(uint32_t page_num, uint32_t sz)
+// enum which_delete {_NONE, _FIRST, _SECOND, _BOTH};
+
+void concat_two_pieces(uint32_t base1, uint32_t size1, uint32_t base2, uint32_t size2, struct v_allocator *a)
 {
-	// if (address ) 
-	// here should be concatenation of free blocks. 
+	show_entries(a);
+	write_num(base1, "base1", 10);
+	write_num(size1, "size1", 10);
+	write_num(base2, "base2", 10);
+	write_num(size2, "size2", 10);
+	(uint32_t)get_entry(size1, base1, true, a);
+	(uint32_t)get_entry(size2, base2, true, a);
+	put_entry(base1, size1 + size2, a);
+	set_meta_inf(get_page(base1), base2 + size2 - 1);
+	set_meta_inf(get_page(base2 + size2 - 1), base1);
+	show_entries(a);
+}
+
+void concat(uint32_t page_num, uint32_t sz, struct v_allocator *a)
+{
+	uint32_t* page = get_page(page_num - 1);
+	uint32_t beg, size_of_free, end;
+	write_num(page_num, "Concating page", 10);
+	write_num(sz, "of size", 10);
+	if (page_num && is_my_page(page_num - 1, a) && !is_present(page))
+	{
+		beg = get_meta_inf(page);
+		write_num(beg, "left concatenation", 10);
+		size_of_free = sz + page_num - beg;
+		concat_two_pieces(beg, page_num - beg, page_num, sz, a);
+		page_num = beg;
+		sz = size_of_free;
+	}
+	page = get_page(page_num + sz);
+	write_num(page_num + sz, "page_num for right", 10);
+	write_num(*page, "*page", 16);
+	if (is_my_page(page_num + sz, a) && !is_present(page))
+	{
+		end = get_meta_inf(page);
+		write_num(end, "right concatenation", 10);
+		concat_two_pieces(page_num, sz, page_num + sz, end - page_num - 1, a); 
+	}
 }
 
 void kfree(void* address, uint32_t size, struct v_allocator* a)
@@ -116,9 +187,12 @@ void kfree(void* address, uint32_t size, struct v_allocator* a)
 	{
 		uint32_t* page = get_page(i);
 		free_phys_page(get_address(*page));
-		*page = *page & (~PT_PRESENT);
+		*page = *page & (~PT_PRESENT) & (~PT_RW);
 	}
 	set_meta_inf(get_page(page_num), page_num + size - 1);
+	// write_num(page_num, "page_num for meta", 10);
+	// write_num(page_num + size - 1, "meta", 10);
 	set_meta_inf(get_page(page_num + size - 1), page_num);
-	concat(page_num, size);
+	concat(page_num, size, a);
+	write_num(a->t->top, "top", 10);
 }

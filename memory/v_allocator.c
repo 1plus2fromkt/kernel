@@ -38,3 +38,17 @@ void remove_entry(uint32_t sz, struct v_allocator* a)
 	struct node* x = a->t->nodes[--a->t->top];
 	a->t->nodes[sz] = x;
 }
+
+bool is_my_page(uint32_t page_num, struct v_allocator* a)
+{
+	return (page_num >= a->left_bound && page_num <= a->right_bound);
+}
+
+void show_entries(struct v_allocator* a)
+{
+	for (int i = 0; i < a->t->top; i++)
+	{
+		write_num(a->t->nodes[i]->val->base, "base", 10);
+		write_num(a->t->nodes[i]->val->free, "free", 10);
+	}
+}
