@@ -16,8 +16,7 @@ struct mem_tree
 	{	
 		struct mem_entry* val;
 		uint32_t depth;
-	};
-	struct node** nodes;
+	} **nodes;
 	uint32_t top;
 };
 

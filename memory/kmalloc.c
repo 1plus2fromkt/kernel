@@ -29,8 +29,8 @@ void init_mem_manager()
 {
 	user_entries[0].base = 0;
 	user_entries[0].free = USER_PAGES;
-	kernel_entries[0].base = (KERNEL_START_INDEX + PAGE_NUMBER) * (PAGE_TABLE_NUMBER); // see comment in about PAGE_NUMBER paging.h
-	kernel_entries[0].free = KERNEL_PAGES - (PAGE_NUMBER) * PAGE_TABLE_NUMBER;
+	kernel_entries[0].base = (KERNEL_START_INDEX + DIR_NUMBER) * (PAGE_TABLE_NUMBER); // see comment in about DIR_NUMBER paging.h
+	kernel_entries[0].free = KERNEL_PAGES - DIR_NUMBER * PAGE_TABLE_NUMBER;
 	for (int i = 0; i < USER_PAGES; i++)
 	{
 		user_nodes[i].val = &user_entries[i];
@@ -134,45 +134,31 @@ void* kmalloc(uint32_t size, struct v_allocator* a)
 	return offsets_to_address(pd_offset, pt_offset, 0);
 }
 
-// enum which_delete {_NONE, _FIRST, _SECOND, _BOTH};
-
 void concat_two_pieces(uint32_t base1, uint32_t size1, uint32_t base2, uint32_t size2, struct v_allocator *a)
 {
-	show_entries(a);
-	write_num(base1, "base1", 10);
-	write_num(size1, "size1", 10);
-	write_num(base2, "base2", 10);
-	write_num(size2, "size2", 10);
 	(uint32_t)get_entry(size1, base1, true, a);
 	(uint32_t)get_entry(size2, base2, true, a);
 	put_entry(base1, size1 + size2, a);
 	set_meta_inf(get_page(base1), base2 + size2 - 1);
 	set_meta_inf(get_page(base2 + size2 - 1), base1);
-	show_entries(a);
 }
 
 void concat(uint32_t page_num, uint32_t sz, struct v_allocator *a)
 {
 	uint32_t* page = get_page(page_num - 1);
 	uint32_t beg, size_of_free, end;
-	write_num(page_num, "Concating page", 10);
-	write_num(sz, "of size", 10);
 	if (page_num && is_my_page(page_num - 1, a) && !is_present(page))
 	{
 		beg = get_meta_inf(page);
-		write_num(beg, "left concatenation", 10);
 		size_of_free = sz + page_num - beg;
 		concat_two_pieces(beg, page_num - beg, page_num, sz, a);
 		page_num = beg;
 		sz = size_of_free;
 	}
 	page = get_page(page_num + sz);
-	write_num(page_num + sz, "page_num for right", 10);
-	write_num(*page, "*page", 16);
 	if (is_my_page(page_num + sz, a) && !is_present(page))
 	{
 		end = get_meta_inf(page);
-		write_num(end, "right concatenation", 10);
 		concat_two_pieces(page_num, sz, page_num + sz, end - page_num - sz + 1, a); 
 	}
 }
@@ -190,9 +176,6 @@ void kfree(void* address, uint32_t size, struct v_allocator* a)
 		*page = *page & (~PT_PRESENT) & (~PT_RW);
 	}
 	set_meta_inf(get_page(page_num), page_num + size - 1);
-	// write_num(page_num, "page_num for meta", 10);
-	// write_num(page_num + size - 1, "meta", 10);
 	set_meta_inf(get_page(page_num + size - 1), page_num);
 	concat(page_num, size, a);
-	write_num(a->t->top, "top", 10);
 }

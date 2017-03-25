@@ -37,7 +37,7 @@ stack_top:
 # doesn't make sense to return from this function as the bootloader is gone.
 .section .text
 .global pd
-.global pn
+.global dn
 .global init_paging
 .global _start
 .type _start, @function
@@ -92,7 +92,7 @@ loop1:
 	add $3072, %edi #3072 = 768 * 4 -- start of kernel
 	movl %edx, (%edi)
 	add $1, %ecx
-	cmpl (pn - 0xC0000000), %ecx 
+	cmpl (dn - 0xC0000000), %ecx 
 	jne loop1
 
 
@@ -118,7 +118,7 @@ loop:
 	jne loop
 
 	add $1, %esi
-	cmpl (pn - 0xC0000000), %esi 
+	cmpl (dn - 0xC0000000), %esi 
 	jne loop2
 
 

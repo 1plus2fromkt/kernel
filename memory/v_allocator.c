@@ -13,7 +13,7 @@ void put_entry(uint32_t base, uint32_t free, struct v_allocator* a)
 }
 
 
-// gets the entry and deletes it!
+// gets the entry and deletes it
 struct mem_entry* get_entry(uint32_t sz, uint32_t base, bool search_base, struct v_allocator* a) 
 {
 	struct node** arr = a->t->nodes;
@@ -46,7 +46,7 @@ bool is_my_page(uint32_t page_num, struct v_allocator* a)
 
 void show_entries(struct v_allocator* a)
 {
-	for (int i = 0; i < a->t->top; i++)
+	for (uint32_t i = 0; i < a->t->top; i++)
 	{
 		write_num(a->t->nodes[i]->val->base, "base", 10);
 		write_num(a->t->nodes[i]->val->free, "free", 10);
