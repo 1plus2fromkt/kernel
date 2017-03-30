@@ -8,11 +8,10 @@
 #include "memory/kmalloc.h"
 #include "memory/memory.h"
 #include "paging.h"
+#include "gdt.h"
 
 char buff[32];
 
-
- 
 void kernel_main(uint32_t magic, multiboot_info_t* info) {
 
 	info = (multiboot_info_t*)((int)info + KERNEL_START);
@@ -22,6 +21,9 @@ void kernel_main(uint32_t magic, multiboot_info_t* info) {
 	terminal_writestring("Memory initialized\n");
 	init_mem_manager();
 	terminal_writestring("Memory manager initialized\n");
+	init_gdt();
+        terminal_writestring("GDT initialized\n");
+        
 	// terminal_writestring("\n");
 	// terminal_writestring(itoa(info->flags, buff, 16));
 	// terminal_writestring("\n");

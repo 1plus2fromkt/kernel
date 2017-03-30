@@ -22,6 +22,7 @@ set (object_files
 		"${CMAKE_CURRENT_SOURCE_DIR}/kernel/handlers.o"
 		"${CMAKE_CURRENT_SOURCE_DIR}/kernel/io.o"
 		"${CMAKE_CURRENT_SOURCE_DIR}/kernel/pic.o"
+		"${CMAKE_CURRENT_SOURCE_DIR}/kernel/gdt.o"
 	) #Yeah, also looks like crap
 
 add_custom_command(
@@ -37,7 +38,7 @@ add_custom_command(
 	COMMAND mkdir -p ${CMAKE_CURRENT_SOURCE_DIR}/isodir/boot/grub
 	COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/myos.bin ${CMAKE_CURRENT_SOURCE_DIR}/isodir/boot/myos.bin
 	COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/boot/grub.cfg ${CMAKE_CURRENT_SOURCE_DIR}/isodir/boot/grub/grub.cfg
-	COMMAND grub-mkrescue -o ${CMAKE_CURRENT_SOURCE_DIR}/myos.iso ${CMAKE_CURRENT_SOURCE_DIR}/isodir
+	COMMAND grub-mkrescue -o ${CMAKE_CURRENT_SOURCE_DIR}/myos.iso ${CMAKE_CURRENT_SOURCE_DIR}/isodir 
 	DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/myos.bin
 )
 
