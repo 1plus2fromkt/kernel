@@ -54,7 +54,6 @@ void init_mem_manager()
 	user_allocator.right_bound = kernel_allocator.left_bound - 1;
 	user_allocator.t = &user_tree;
 	free_pages(&kernel_allocator);
-	// free_pages(&user_allocator); not working, I don't think we need it. Some bugs with USER_PAGE
 }
 
 uint32_t* get_address(uint32_t page)

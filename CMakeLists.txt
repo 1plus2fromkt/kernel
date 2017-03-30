@@ -18,7 +18,11 @@ set (object_files
 		"${CMAKE_CURRENT_SOURCE_DIR}/kernel/tty.o"
 		"${CMAKE_CURRENT_SOURCE_DIR}/memory/kmalloc.o"
 		"${CMAKE_CURRENT_SOURCE_DIR}/memory/v_allocator.o"
-	)
+		"${CMAKE_CURRENT_SOURCE_DIR}/kernel/idt.o"
+		"${CMAKE_CURRENT_SOURCE_DIR}/kernel/handlers.o"
+		"${CMAKE_CURRENT_SOURCE_DIR}/kernel/io.o"
+		"${CMAKE_CURRENT_SOURCE_DIR}/kernel/pic.o"
+	) #Yeah, also looks like crap
 
 add_custom_command(
 	OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/myos.bin
