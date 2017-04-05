@@ -9,11 +9,13 @@
 #include "memory/memory.h"
 #include "paging.h"
 #include "gdt.h"
+#include "idt.h"
 
 char buff[32];
 
-void kernel_main(uint32_t magic, multiboot_info_t* info) {
-
+void kernel_main(uint32_t magic, multiboot_info_t* info)
+{
+	disable_interrupts();
 	info = (multiboot_info_t*)((int)info + KERNEL_START);
 	terminal_initialize();
 	terminal_writestring("Hello world\n");
@@ -22,8 +24,12 @@ void kernel_main(uint32_t magic, multiboot_info_t* info) {
 	init_mem_manager();
 	terminal_writestring("Memory manager initialized\n");
 	init_gdt();
-        terminal_writestring("GDT initialized\n");
-        
+    terminal_writestring("GDT initialized\n");
+	init_interrupts();
+	terminal_writestring("IDT initialized\n");
+	enable_interrupts();
+	__asm volatile("int $116");
+	// tempor();
 	// terminal_writestring("\n");
 	// terminal_writestring(itoa(info->flags, buff, 16));
 	// terminal_writestring("\n");

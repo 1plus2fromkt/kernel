@@ -23,6 +23,7 @@ set (object_files
 		"${CMAKE_CURRENT_SOURCE_DIR}/kernel/io.o"
 		"${CMAKE_CURRENT_SOURCE_DIR}/kernel/pic.o"
 		"${CMAKE_CURRENT_SOURCE_DIR}/kernel/gdt.o"
+		"${CMAKE_CURRENT_SOURCE_DIR}/kernel/handlers_asm.o"
 	) #Yeah, also looks like crap
 
 add_custom_command(

@@ -38,7 +38,6 @@ stack_top:
 .section .text
 .global pd
 .global dn
-.global init_paging
 .global _start
 .type _start, @function
 _start:

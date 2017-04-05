@@ -3,6 +3,9 @@
 
 #include <stdint.h>
 
+#define KERNEL_CODE_SEGMENT 1
+#define KERNEL_DATA_SEGMENT 2
+
 typedef struct gdt_entry_t
 {
     uint16_t limit;

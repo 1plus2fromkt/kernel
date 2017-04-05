@@ -105,6 +105,33 @@ void init_gdt_user_data_segment(gdt_entry_t* gdt)
 
 gdt_entry_t gdts[5];
 
+__attribute__ ((noinline)) static void reload_segments()
+{
+  __asm volatile(
+    "ljmp $0x08, $reload_cs\n\t"
+    "reload_cs:\n\t"
+    "movw $0x10, %%ax\n\t"
+    "movw %%ax, %%ds\n\t"
+    "movw %%ax, %%es\n\t"
+    "movw %%ax, %%fs\n\t"
+    "movw %%ax, %%gs\n\t"
+    "movw %%ax, %%ss\n\t"
+    :
+    :
+    : "ax");
+}
+
+void set_gdtr(gdt_entry_t* addr, uint16_t size)
+{
+  struct {
+    uint16_t size;
+    uint32_t addr;
+  } __attribute__((packed)) gdtr = {.size = size - 1, .addr = (uint32_t)addr};
+
+  __asm volatile("lgdt (%0)": : "a"(&gdtr));
+  reload_segments();
+}
+
 void init_gdt()
 {
     init_gdt_empty_segment(&gdts[0]);
@@ -112,4 +139,5 @@ void init_gdt()
     init_gdt_kernel_data_segment(&gdts[2]);
     init_gdt_user_code_segment(&gdts[3]);
     init_gdt_user_data_segment(&gdts[4]);
+    set_gdtr(gdts, sizeof(gdts));
 }
