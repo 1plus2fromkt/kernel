@@ -5,7 +5,7 @@
 void kbd_interrupt_impl()
 {
     terminal_writestring("h\n");
-    // pic_send_eoi(KBD_IRQ);
+    pic_send_eoi(KBD_IRQ);
 }
 
 void tempor_impl()

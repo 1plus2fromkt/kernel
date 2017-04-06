@@ -32,8 +32,7 @@ void init_idtr(struct idt_entry* addr, uint16_t size)
 	} __attribute__ ((packed)) idtr;
 	idtr.limit = size - 1;
 	idtr.base = (uint32_t) addr;
-	__asm volatile("lidt (%0)": : "a"(&idtr));
-	terminal_writestring("IDT set\n"); // WHITHOUT THIS FUCKING STRING IT IS NOT WORKING WTF
+	__asm volatile("lidt (%0)": : "a"(&idtr) : "memory" );
 }
 
 void init_interrupts()
