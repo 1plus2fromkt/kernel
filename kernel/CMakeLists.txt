@@ -27,6 +27,6 @@ add_custom_command(
 
 add_custom_target(
 	kernel_run ALL
-	DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/kernel.o ${CMAKE_CURRENT_SOURCE_DIR}/paging.o ${CMAKE_CURRENT_SOURCE_DIR}/tty.o ${CMAKE_CURRENT_SOURCE_DIR}/io.o ${CMAKE_CURRENT_SOURCE_DIR}/idt.o ${CMAKE_CURRENT_SOURCE_DIR}/pic.o ${CMAKE_CURRENT_SOURCE_DIR}/handlers.o ${CMAKE_CURRENT_SOURCE_DIR}/gdt.o ${CMAKE_CURRENT_SOURCE_DIR}/handlers_asm.o
+	DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/kernel.o ${CMAKE_CURRENT_SOURCE_DIR}/paging.o ${CMAKE_CURRENT_SOURCE_DIR}/tty.o ${CMAKE_CURRENT_SOURCE_DIR}/io.o ${CMAKE_CURRENT_SOURCE_DIR}/idt.o ${CMAKE_CURRENT_SOURCE_DIR}/pic.o ${CMAKE_CURRENT_SOURCE_DIR}/handlers.o ${CMAKE_CURRENT_SOURCE_DIR}/gdt.o ${CMAKE_CURRENT_SOURCE_DIR}/handlers_asm.o 
 ) 
 #I know how it looks like, I know it can be replaced, I am too lazy to replace it. If you want to replace it, do it, please.

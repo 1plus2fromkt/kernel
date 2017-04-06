@@ -13,22 +13,17 @@ void tempor();
 
 struct idt_entry idt[IDT_NUMBER];
 
-void add_entry(void* function, uint32_t num)
+void add_entry(void (*function)(), uint32_t num) // void* function not working help me please.
 {
 	struct idt_entry* en = &idt[num];
 	en->offset_1 = ((uint32_t)function) & 0xffff;
-	en->offset_2 = (((uint32_t)function) >> 16) & 0xffff; // don't know why & 0xffff, maybe not needed
-	write_num((uint32_t) function, "function", 16);
-	write_num(en->offset_1, "first", 16);
-	write_num(en->offset_2, "second", 16);
+	en->offset_2 = (((uint32_t)function) >> 16);
 	en->zero = 0;
 	en->selector = KERNEL_CODE_SEGMENT << 3; // according to http://wiki.osdev.org/Selector
-	write_num(en->selector, "selector", 16);
 	en->type_attr = PRESENT_BIT | INTERRUPT_GATE;
-	write_num(en->type_attr, "type_attr", 16);
 }
 
-void init_idtr(struct idt_entry* addr, uint32_t size)
+void init_idtr(struct idt_entry* addr, uint16_t size)
 {
 	struct
 	{
@@ -37,15 +32,15 @@ void init_idtr(struct idt_entry* addr, uint32_t size)
 	} __attribute__ ((packed)) idtr;
 	idtr.limit = size - 1;
 	idtr.base = (uint32_t) addr;
-	__asm volatile("lidt (%0)" :: "a"(&idtr));
+	__asm volatile("lidt (%0)": : "a"(&idtr));
+	terminal_writestring("IDT set\n"); // WHITHOUT THIS FUCKING STRING IT IS NOT WORKING WTF
 }
 
 void init_interrupts()
 {
     pic_remap(PIC1, PIC2);
-    write_num((uint32_t)&tempor, "tempor", 16);
 	add_entry((void*)&kbd_wrapper, PIC_OFFSET + KBD_IRQ);
-	add_entry((void*)&tempor, 116);
+	add_entry((void*)&tempor, 100);
 	init_idtr(idt, sizeof(idt));
 }
 

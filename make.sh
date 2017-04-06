@@ -1,2 +1,6 @@
 cd build
-make
+if [[ "$1" = "B" ]]; then
+	make -B
+else 
+	make
+fi

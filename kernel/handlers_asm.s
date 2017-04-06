@@ -15,8 +15,16 @@ kbd_wrapper:
 .align 4
 .type tempor, @function
 tempor:
-	# pushal
-	# cld 
+	pushal
+	pushl %ds
+	pushl %es
+	pushl %ebp
+	
 	# call tempor_impl
-	# popal
-	ret
+	# addl $4, %esp
+
+	popl %ebp
+	popl %es
+	popl %ds
+	popal
+	iret
