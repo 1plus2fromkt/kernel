@@ -4,6 +4,7 @@
 #define IDT_NUMBER 256
 
 #define PIC_OFFSET 0x20
+#define TMR_IRQ 0x0
 #define KBD_IRQ 0x1
 
 void init_interrupts();

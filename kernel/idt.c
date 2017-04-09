@@ -9,7 +9,8 @@
 #define INTERRUPT_GATE 0xe
 
 void kbd_wrapper();
-void tempor();
+void syscall_wrapper();
+void empty_wrapper();
 
 struct idt_entry idt[IDT_NUMBER];
 
@@ -39,7 +40,8 @@ void init_interrupts()
 {
     pic_remap(PIC1, PIC2);
 	add_entry((void*)&kbd_wrapper, PIC_OFFSET + KBD_IRQ);
-	add_entry((void*)&tempor, 100);
+	add_entry((void*)&empty_wrapper, PIC_OFFSET + TMR_IRQ);
+	add_entry((void*)&syscall_wrapper, 0x80);
 	init_idtr(idt, sizeof(idt));
 }
 

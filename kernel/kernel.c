@@ -28,10 +28,9 @@ void kernel_main(uint32_t magic, multiboot_info_t* info)
 	init_interrupts();
 	terminal_writestring("IDT initialized\n");
 	enable_interrupts();
-	__asm volatile("int $100");
-	// tempor();
-	// terminal_writestring("\n");
-	// terminal_writestring(itoa(info->flags, buff, 16));
-	// terminal_writestring("\n");
-	// terminal_writestring(itoa(magic, buff, 16));
+	__asm volatile("int $128");
+	while (1)
+    {
+      __asm volatile("hlt");
+    }
 }

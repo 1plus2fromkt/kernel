@@ -11,13 +11,26 @@ kbd_wrapper:
     iret
 
 
-.global tempor
+.global syscall_wrapper
 .align 4
-.type tempor, @function
-tempor:
-	# pushal
-	# cld
-	# call tempor_impl
-	# popal
+.type syscall_wrapper, @function
+syscall_wrapper:
+	# load arguments from registers
+	pushal
+	cld
+	# push them as arguments to syscall_impl
+	call syscall_impl
+	popal
 	iret
-	
+
+.global empty_wrapper
+.align 4
+.type empty_wrapper, @function
+empty_wrapper:
+	pushal
+	cld
+	pushl $0
+	call pic_send_eoi
+	popl %eax # remove "0" from stack, so it will return to the prev size
+	popal
+	iret
