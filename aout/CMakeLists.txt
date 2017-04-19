@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(memory)
+project(aout)
 
 function(compile_i686 name)
 	add_custom_command(
@@ -10,10 +10,9 @@ function(compile_i686 name)
 	)
 endfunction(compile_i686)
 
-compile_i686("itoa")
-compile_i686("reverse")
+compile_i686(loader)
 
 add_custom_target(
-	libc_run ALL
-	DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/itoa.o ${CMAKE_CURRENT_SOURCE_DIR}/reverse.o
+	aout_run ALL
+	DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/loader.o 
 )

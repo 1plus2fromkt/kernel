@@ -4,13 +4,17 @@
 #include <stdbool.h>
 #include "kernel/kernel.h"
 #include "kernel/tty.h"
+#include "kernel/user.h"
 #include "libc/itoa.h"
 #include "v_allocator.h"
 
-struct v_allocator user_allocator, kernel_allocator;
-struct node user_nodes[USER_PAGES], kernel_nodes[KERNEL_PAGES], *puser_nodes[USER_PAGES], *pkernel_nodes[KERNEL_PAGES];
-struct mem_entry user_entries[USER_PAGES], kernel_entries[KERNEL_PAGES];
-struct mem_tree user_tree, kernel_tree;
+struct v_allocator *user_allocator, kernel_allocator;
+// struct node user_nodes[USER_PAGES], *puser_nodes[USER_PAGES];
+struct node kernel_nodes[KERNEL_PAGES], *pkernel_nodes[KERNEL_PAGES];
+struct mem_entry /*user_entries[USER_PAGES], */kernel_entries[KERNEL_PAGES];
+struct mem_tree /*user_tree, */kernel_tree;
+struct v_allocator process_allocators[NUMBER_OF_PROCESSES];
+struct mem_tree process_trees[NUMBER_OF_PROCESSES];
 
 // maybe user allocator is not needed here. Probably we don't need it
 
@@ -27,38 +31,38 @@ void free_pages(struct v_allocator* a)
 
 void init_mem_manager()
 {
-	user_entries[0].base = 0;
-	user_entries[0].free = USER_PAGES;
+	// user_entries[0].base = 0;
+	// user_entries[0].free = USER_PAGES;
 	kernel_entries[0].base = (KERNEL_START_INDEX + DIR_NUMBER) * (PAGE_TABLE_NUMBER); // see comment in about DIR_NUMBER paging.h
 	kernel_entries[0].free = KERNEL_PAGES - DIR_NUMBER * PAGE_TABLE_NUMBER;
-	for (int i = 0; i < USER_PAGES; i++)
-	{
-		user_nodes[i].val = &user_entries[i];
-		user_nodes[i].depth = 0;
-		puser_nodes[i] = &user_nodes[i];
-	}
+	// for (int i = 0; i < USER_PAGES; i++)
+	// {
+	// 	user_nodes[i].val = &user_entries[i];
+	// 	user_nodes[i].depth = 0;
+	// 	puser_nodes[i] = &user_nodes[i];
+	// }
 	for (int i = 0; i < KERNEL_PAGES; i++)
 	{
 		kernel_nodes[i].val = &kernel_entries[i];
 		kernel_nodes[i].depth = 0;
 		pkernel_nodes[i] = &kernel_nodes[i];
 	}
-	user_tree.nodes = puser_nodes;
-	user_tree.top = 1;
+	// user_tree.nodes = puser_nodes;
+	// user_tree.top = 1;
 	kernel_tree.nodes = pkernel_nodes;
 	kernel_tree.top = 1;
 	kernel_allocator.t = &kernel_tree;
 	kernel_allocator.left_bound = KERNEL_START_INDEX * PAGE_TABLE_NUMBER;
 	kernel_allocator.right_bound = PAGE_DIRECTORY_NUMBER * PAGE_TABLE_NUMBER;
-	user_allocator.left_bound = 0;
-	user_allocator.right_bound = kernel_allocator.left_bound - 1;
-	user_allocator.t = &user_tree;
+	// user_allocator.left_bound = 0;
+	// user_allocator.right_bound = kernel_allocator.left_bound - 1;
+	// user_allocator.t = &user_tree;
 	free_pages(&kernel_allocator);
 }
 
 uint32_t* get_address(uint32_t page)
 {
-	return (uint32_t*)((page >> SYSTEM_BYTES) << SYSTEM_BYTES);
+	return (uint32_t*)(((page >> SYSTEM_BYTES) << SYSTEM_BYTES) + KERNEL_START);
 }
 
 uint32_t* get_page(uint32_t ind)
@@ -104,10 +108,8 @@ uint32_t address_to_tab_num(void* ad)
 void present_dir(uint32_t ind)
 {
 	uint32_t dir_num = ind / PAGE_TABLE_NUMBER;
-	pd[dir_num] |= PT_PRESENT | PT_RW;
+	pd[dir_num] = PT_PRESENT | PT_RW | (((uint32_t) pt[dir_num]) - KERNEL_START);
 }
-
-char buff[64];
 
 void* kmalloc(uint32_t size, struct v_allocator* a)
 {
@@ -117,8 +119,11 @@ void* kmalloc(uint32_t size, struct v_allocator* a)
 	uint32_t* page;
 	for (uint32_t i = base; i < base + size; i++)
 	{
+		if (!(i % PAGE_TABLE_NUMBER))
+		{
+			present_dir(i);
+		}
 		page = get_page(i);
-		present_dir(i);
 		uint32_t phys = (uint32_t)load_phys_page();
 		(*page) = phys | PT_PRESENT | PT_RW;
 	}

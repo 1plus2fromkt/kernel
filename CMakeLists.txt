@@ -6,6 +6,7 @@ add_subdirectory(boot)
 add_subdirectory(libc)
 add_subdirectory(kernel)
 add_subdirectory(memory)
+add_subdirectory(aout)
 
 set (object_files 
 		"${CMAKE_CURRENT_SOURCE_DIR}/boot/linker.ld"
@@ -24,13 +25,15 @@ set (object_files
 		"${CMAKE_CURRENT_SOURCE_DIR}/kernel/pic.o"
 		"${CMAKE_CURRENT_SOURCE_DIR}/kernel/gdt.o"
 		"${CMAKE_CURRENT_SOURCE_DIR}/kernel/handlers_asm.o"
-	) #Yeah, also looks like crap
+		"${CMAKE_CURRENT_SOURCE_DIR}/aout/loader.o"
+		"${CMAKE_CURRENT_SOURCE_DIR}/kernel/user.o"
+	) #Yeah, also looks like crap.
 
 add_custom_command(
 	OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/myos.bin
 	COMMAND i686-elf-gcc -T ${CMAKE_CURRENT_SOURCE_DIR}/boot/linker.ld -o ${CMAKE_CURRENT_SOURCE_DIR}/myos.bin 
-						-ffreestanding -O2 -nostdlib ${object_files} -lgcc
-	DEPENDS memory_run kernel_run boot_run libc_run ${object_files} 
+						-ffreestanding -nostdlib ${object_files} -lgcc
+	DEPENDS memory_run kernel_run boot_run libc_run aout_run ${object_files} 
 )
 
 
