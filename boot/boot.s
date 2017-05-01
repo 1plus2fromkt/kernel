@@ -90,7 +90,7 @@ loop1:
 	movl %edx, (%edi) 
 	add $3072, %edi #3072 = 768 * 4 -- start of kernel
 	movl %edx, (%edi)
-	add $1, %ecx
+	inc %ecx
 	cmpl (dn - 0xC0000000), %ecx 
 	jne loop1
 
