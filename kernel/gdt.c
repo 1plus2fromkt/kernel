@@ -113,7 +113,7 @@ void init_gdt_tss(gdt_entry_t *gdt) {
     gdt_set_base(gdt, base);
     gdt_set_limit(gdt, limit);
     gdt_set_access(gdt, 3); // 3, right?
-    gdt->access |= 1 | (1 << 7);
+    gdt->access |= 1 | (1 << 3) | (1 << 7);
     // g->accessed=1; //This indicates it's a TSS and not a LDT. This is a changed meaning
     // g->read_write=0; //This indicates if the TSS is busy or not. 0 for not busy
     // g->conforming_expand_down=0; //always 0 for TSS
