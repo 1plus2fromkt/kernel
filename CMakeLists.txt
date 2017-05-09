@@ -27,6 +27,7 @@ set (object_files
 		"${CMAKE_CURRENT_SOURCE_DIR}/kernel/handlers_asm.o"
 		"${CMAKE_CURRENT_SOURCE_DIR}/aout/loader.o"
 		"${CMAKE_CURRENT_SOURCE_DIR}/kernel/user.o"
+		"${CMAKE_CURRENT_SOURCE_DIR}/kernel/jump_usermode.o"
 	) #Yeah, also looks like crap.
 
 add_custom_command(

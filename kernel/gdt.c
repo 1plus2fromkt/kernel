@@ -1,4 +1,5 @@
 #include "gdt.h"
+#include "tss.h"
 
 void init_gdt_single_entry(gdt_entry_t* gdt)
 {
@@ -103,7 +104,56 @@ void init_gdt_user_data_segment(gdt_entry_t* gdt)
     gdt->flags |= (1 << 6) | (1 << 7);
 }
 
-gdt_entry_t gdts[5];
+tss_entry_t tss_entry;
+
+void init_gdt_tss(gdt_entry_t *gdt) {
+    uint32_t base = (uint32_t) &tss_entry;
+    uint32_t limit = sizeof(tss_entry);
+
+    gdt_set_base(gdt, base);
+    gdt_set_limit(gdt, limit);
+    gdt_set_access(gdt, 3); // 3, right?
+    gdt->access |= 1 | (1 << 7);
+    // g->accessed=1; //This indicates it's a TSS and not a LDT. This is a changed meaning
+    // g->read_write=0; //This indicates if the TSS is busy or not. 0 for not busy
+    // g->conforming_expand_down=0; //always 0 for TSS
+    // g->code=1; //For TSS this is 1 for 32bit usage, or 0 for 16bit. !!!!!!!!!???????
+    // g->always_1=0; //indicate it is a TSS
+    // g->DPL=3; //same meaning
+    // g->present=1; //same meaning
+    // g->available=0;
+    // g->always_0=0; //same thing
+    // g->big=0; //should leave zero according to manuals. No effect
+    // g->gran=0; //so that our computed GDT limit is in bytes, not pages
+
+    for (uint32_t i = 0; i < sizeof(tss_entry); i++) {
+        ((uint32_t*) &tss_entry)[i] = 0;
+    }
+
+    tss_entry.ss0  = 0x10;  // Set the kernel stack segment.
+    register int stack_p asm("esp"); //???
+    tss_entry.esp0 = stack_p; // Set the kernel stack pointer.
+}
+
+// need that for interrupts?
+void set_kernel_stack(uint32_t stack) {
+   tss_entry.esp0 = stack;
+}
+
+void flush_tss() {
+    __asm volatile(
+        "movw 0x2b, %ax\n\t"
+        "ltr %ax\n\t"
+    );
+}
+
+gdt_entry_t gdts[6];
+// null
+// kernel code
+// kernel data
+// user code
+// user data
+// tss
 
 __attribute__ ((noinline)) static void reload_segments()
 {
@@ -139,5 +189,11 @@ void init_gdt()
     init_gdt_kernel_data_segment(&gdts[2]);
     init_gdt_user_code_segment(&gdts[3]);
     init_gdt_user_data_segment(&gdts[4]);
+    init_gdt_tss(&gdts[5]);
     set_gdtr(gdts, sizeof(gdts));
+    flush_tss();
+}
+
+void test() {
+    while (1) { }
 }

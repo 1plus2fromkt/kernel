@@ -44,7 +44,10 @@ void kernel_main(uint32_t magic, multiboot_info_t* info)
 	// 		break;
 	// 	}
 	// }  WORKS
-	exec(0);
+	terminal_writestring("starting execution\n");
+	// exec(0);
+	terminal_writestring("execution finished\n");
+	// jump_usermode();
 	__asm volatile("int $128");
 	while (1)
     {
